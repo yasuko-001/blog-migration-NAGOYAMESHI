@@ -1,0 +1,2 @@
+# blog-migration-NAGOYAMESHI
+食べログアプリ「NAGOYAMESHI」をオンプレミスサーバーからAWSクラウドサーバーへ移行することを想定したデモンストレーションです。
