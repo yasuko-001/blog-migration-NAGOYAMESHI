@@ -17,11 +17,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 権限調整（重要）
-RUN chown -R www-data:www-data /var/www/html \
- && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+# Laravel 必須ディレクトリ作成＆権限
+RUN mkdir -p storage bootstrap/cache \
+ && chown -R www-data:www-data /var/www/html \
+ && chmod -R 755 storage bootstrap/cache
 
-# Apache の DocumentRoot を public に変更
+# Apache DocumentRoot を public に変更
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' \
     /etc/apache2/sites-available/000-default.conf
 
