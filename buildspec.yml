@@ -11,6 +11,8 @@ phases:
       - echo "[BUILD] Building Laravel Docker image..."
       - docker build --no-cache -f Dockerfile.deployment -t ${CONTAINER_NAME} .
       - docker tag ${CONTAINER_NAME} ${REPOSITORY_URI}:latest
+      # ⭐ここが前は無かったっぽい：ECRへ push
+      - docker push ${REPOSITORY_URI}:latest
 
   post_build:
     commands:
@@ -24,6 +26,7 @@ phases:
           --region ap-northeast-1
 
       - echo "[POST_BUILD] Writing imagedefinitions.json for ECS Deploy..."
+      # ⭐ECS タスク定義のコンテナ名に合わせる
       - printf '[{"name":"blogdemo-dev-container","imageUri":"%s:latest"}]' "$REPOSITORY_URI" > imagedefinitions.json
 
 artifacts:
