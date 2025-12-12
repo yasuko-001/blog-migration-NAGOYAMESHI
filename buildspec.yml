@@ -24,7 +24,8 @@ phases:
           --region ap-northeast-1
 
       - echo "[POST_BUILD] Writing imagedefinitions.json for ECS Deploy..."
-      - printf '[{"name":"%s","imageUri":"%s:latest"}]' "$CONTAINER_NAME" "$REPOSITORY_URI" > imagedefinitions.json
+      - printf '[{"name":"blogdemo-dev-container","imageUri":"%s:latest"}]' "$REPOSITORY_URI" > imagedefinitions.json
+
 artifacts:
   files:
     - imagedefinitions.json
