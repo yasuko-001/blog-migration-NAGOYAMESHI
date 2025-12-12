@@ -80,3 +80,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin
 
     Route::resource('terms', Admin\TermController::class)->only(['index', 'edit', 'update']);
 });
+
+// ALB Health Check 用
+Route::get('/health', function () {
+    return response('ok', 200);
+});
