@@ -4,18 +4,23 @@ phases:
   pre_build:
     commands:
       - echo "[PRE_BUILD] Logging in to Amazon ECR..."
-      - aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin ${REPOSITORY_URI}
+      - aws --version
+      - REPOSITORY_URI=${REPOSITORY_URI}
+      - echo "Using REPOSITORY_URI: $REPOSITORY_URI"
+      - aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
 
   build:
     commands:
       - echo "[BUILD] Building Laravel Docker image..."
-      - docker build --no-cache -f Dockerfile.deployment -t ${CONTAINER_NAME} .
-      - docker tag ${CONTAINER_NAME} ${REPOSITORY_URI}:latest
-      - docker push ${REPOSITORY_URI}:latest
+      - docker build --no-cache -f Dockerfile.deployment -t blogdemo-app .
+      - docker tag blogdemo-app:latest $REPOSITORY_URI:latest
 
   post_build:
     commands:
-      - echo "[POST_BUILD] Running Laravel migration via ECS RunTask..."
+      - echo "[POST_BUILD] Pushing Docker image to ECR..."
+      - docker push $REPOSITORY_URI:latest
+
+      - echo "[POST_BUILD] Running Laravel migration task on ECS..."
       - |
         aws ecs run-task \
           --cluster ${ECS_CLUSTER_NAME} \
@@ -24,8 +29,8 @@ phases:
           --network-configuration "awsvpcConfiguration={subnets=[${SUBNET_ID_1},${SUBNET_ID_2}],securityGroups=[${SECURITY_GROUP_ID}],assignPublicIp=DISABLED}" \
           --region ap-northeast-1
 
-      - echo "[POST_BUILD] Writing imagedefinitions.json for ECS Deploy..."
-      - printf '[{"name":"blogdemo-dev-container","imageUri":"%s:latest"}]' "$REPOSITORY_URI" > imagedefinitions.json
+      - echo "[POST_BUILD] Generating imagedefinitions.json for ECS Deployment..."
+      - printf '[{"name":"blogdemo-app","imageUri":"%s:latest"}]' "$REPOSITORY_URI" > imagedefinitions.json
 
 artifacts:
   files:
