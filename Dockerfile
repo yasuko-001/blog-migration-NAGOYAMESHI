@@ -46,4 +46,8 @@ RUN composer install --no-dev --optimize-autoloader
 # ---------------------------------------------
 # Start application
 # ---------------------------------------------
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+CMD cd /app \
+ && composer config allow-plugins.composer/installers true \
+ && composer update \
+ && php ./artisan serve --host 0.0.0.0 --port=80
+
