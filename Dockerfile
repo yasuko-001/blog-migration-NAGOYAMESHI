@@ -38,8 +38,9 @@ ENV COMPOSER_HOME=/composer
 # ---------------------------------------------
 COPY . .
 
-# ★★★ ここがコーチ助言の追記ポイント ★★★
-RUN chown -R www-data:www-data storage bootstrap/cache \
+# ★★★ 修正ポイント（ディレクトリを作ってから権限付与） ★★★
+RUN mkdir -p storage bootstrap/cache \
+ && chown -R www-data:www-data storage bootstrap/cache \
  && chmod -R 775 storage bootstrap/cache
 
 # ---------------------------------------------
