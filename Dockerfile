@@ -1,22 +1,27 @@
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
-RUN apt-get update && apt-get install -y \
-    git zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
- && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install pdo_mysql gd
+WORKDIR /app
 
-RUN a2enmod rewrite
+RUN apt-get update \
+    && apt-get install -y \
+    git \
+    zip \
+    unzip \
+    vim \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libmcrypt-dev \
+    libpng-dev \
+    libfontconfig1 \
+    libxrender1
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install gd
+RUN docker-php-ext-install bcmath
+RUN docker-php-ext-install pdo_mysql mysqli exif
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_HOME /composer
 
-WORKDIR /var/www/html
-COPY . .
-
-RUN composer install --no-dev --optimize-autoloader \
- && cp .env.example .env \
- && php artisan key:generate
-
-RUN chown -R www-data:www-data storage bootstrap/cache
-
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' \
-    /etc/apache2/sites-available/000-default.conf
+CMD cd /app && composer config allow-plugins.composer/installers true && composer update && php ./artisan serve --host 0.0.0.0 --port=80
