@@ -3,12 +3,9 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "[PRE_BUILD] Logging in to Docker Hub..."
-      - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-
       - echo "[PRE_BUILD] Logging in to Amazon ECR..."
-      - aws ecr get-login-password --region ap-northeast-1 \
-        | docker login --username AWS --password-stdin ${REPOSITORY_URI}
+      - aws ecr get-login-password --region ap-northeast-1 |
+        docker login --username AWS --password-stdin ${REPOSITORY_URI}
 
   build:
     commands:
@@ -18,9 +15,6 @@ phases:
 
   post_build:
     commands:
-      - echo "[POST_BUILD] Pushing image to ECR..."
-      - docker push ${REPOSITORY_URI}:latest
-
       - echo "[POST_BUILD] Writing imagedefinitions.json"
       - printf '[{"name":"blogdemo-dev-container","imageUri":"%s:latest"}]' "$REPOSITORY_URI" > imagedefinitions.json
 
